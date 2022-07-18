@@ -3,11 +3,13 @@ export interface IHotel {
   hotelName: string;
   description: string;
   price: number;
+  salePrice: number;
   imageUrl: string;
   rating: number;
   tags?: string[];
+  catId?: number;
+  cat?: string;
 }
-
 
 export class Hotel implements IHotel {
 
@@ -16,6 +18,7 @@ export class Hotel implements IHotel {
     public hotelName: string,
     public description: string,
     public price: number,
+    public salePrice: number,
     public imageUrl: string,
     public rating: number,
     public tags: string[]

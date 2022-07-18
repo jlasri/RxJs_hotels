@@ -16,7 +16,6 @@
       </div>
       <div class="col-md-8 form-group">
         <input type="text" class="form-control" [(ngModel)]="hotelFilter" />
-        <!-- <input type="text" class="form-control" [ngModel]="hotelFilter" (ngModelChange)="hotelFilter = $event "> -->
       </div>
     </div>
   </div>
@@ -24,7 +23,7 @@
     {{ receivedRating }}
   </div>
   <div class="row row-cols-1 row-cols-md-3">
-    <div class="col mb-4" *ngFor="let hotel of filteredHotels">
+    <div class="col mb-4" *ngFor="let hotel of filteredHotels$ | async">
       <div class="card">
         <img
           [src]="hotel.imageUrl"
@@ -38,10 +37,20 @@
             {{ hotel.description }}
           </p>
 
+          <p class="card-text text-decoration-line-through text-danger">
+            <del>
+              {{
+                hotel.salePrice | currency: "EUR":"symbol":"1.2-2":"fr" | replaceComma
+              }}
+            </del>
+          </p>
           <p class="card-text">
             {{
               hotel.price | currency: "EUR":"symbol":"1.2-2":"fr" | replaceComma
             }}
+          </p>
+          <p class="card-text">
+            {{ hotel.cat }}
           </p>
 
           <div class="d-flex justify-content-between align-items-baseline">

@@ -1,5 +1,5 @@
 <div class="container">
-  <div class="card" *ngIf="hotel">
+  <div class="card" *ngIf="hotel$ | async as hotel">
     <div class="card-header text-white bg-info">
       {{ hotel.hotelName | uppercase }}
     </div>
@@ -15,6 +15,18 @@
           <div class="row">
             <div class="col-md-4">Description:</div>
             <div class="col-md-8">{{ hotel.description }}</div>
+            <div class="col-md-4">Category:</div>
+            <div class="col-md-8">{{ hotel.cat }}</div>
+          </div>
+          <div class="row">
+            <div class="col-md-4">Prix initial:</div>
+            <div class="col-md-8 text-danger">
+              <del>
+                {{
+                  hotel.salePrice | currency: "EUR":"symbol":"1.2-2":"fr" | replaceComma
+                }}
+              </del>
+            </div>
           </div>
           <div class="row">
             <div class="col-md-4">Prix:</div>

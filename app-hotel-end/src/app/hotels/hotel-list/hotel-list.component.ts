@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { EMPTY, Observable, of, throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { Hotel, IHotel } from '../shared/models/hotel';
 import { HotelListService } from '../shared/services/hotel-list.service';
 
@@ -11,10 +13,13 @@ export class HotelListComponent implements OnInit {
   public title = 'Liste hotels';
 
   public hotels: IHotel[] = [];
+  public hotels$: Observable<IHotel[]> = of([]);
+
+  public filteredHotels: IHotel[] = [];
+  public filteredHotels$: Observable<IHotel[]> = of([]);
 
   public showBadge: boolean = true;
   private _hotelFilter = 'mot';
-  public filteredHotels: IHotel[] = [];
   public receivedRating: string;
   public errMsg: string;
 
@@ -24,13 +29,18 @@ export class HotelListComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.hotelListService.getHotels().subscribe({
-      next: hotels => {
-        this.hotels = hotels;
-        this.filteredHotels = this.hotels;
-      },
-      error: err => this.errMsg = err
-    });
+    this.hotels$ = this.hotelListService.getHotels()
+                                                .pipe(
+                                                  catchError((err) => {
+                                                    this.errMsg = err;
+                                                    // Renvoyer on observable qui contient l'erreur => Ignorer Next et executer error
+                                                    return throwError(err);
+
+                                                    // Renvoyer un observable qui ne contient aucune valeur => Ignorer next et error et executer complete
+                                                    // return EMPTY;
+                                                  })
+                                                );
+    this.filteredHotels$ = this.hotels$;
     this.hotelFilter = '';
   }
 
@@ -46,7 +56,14 @@ export class HotelListComponent implements OnInit {
   public set hotelFilter(filter: string) {
     this._hotelFilter = filter;
 
-    this.filteredHotels = this.hotelFilter ? this.filterHotels(this.hotelFilter) : this.hotels;
+    if(this.hotelFilter) {
+      this.filteredHotels$ = this.hotels$
+                                        .pipe(
+                                          map((hotels: IHotel[]) => this.filterHotels(this.hotelFilter, hotels))
+                                        )
+    } else{
+      this.filteredHotels$ = this.hotels$;
+    }
   }
 
   public receiveRatingClicked(message: string): void {
@@ -54,13 +71,11 @@ export class HotelListComponent implements OnInit {
   }
 
 
-  private filterHotels(criteria: string): IHotel[] {
+  private filterHotels(criteria: string, hotels: IHotel[]): IHotel[] {
     criteria = criteria.toLocaleLowerCase();
 
-    const res = this.hotels.filter(
+    return hotels.filter(
       (hotel: IHotel) => hotel.hotelName.toLocaleLowerCase().indexOf(criteria) !== -1
     );
-
-    return res;
   }
 }
