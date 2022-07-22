@@ -1,5 +1,25 @@
 <div class="container">
+  <div class="alert alert-danger" *ngIf="errMsg$ | async as errMsg" role="alert">
+    {{ errMsg }}
+  </div>
   <h2 *ngIf="hotels && hotels.length > 0">{{ title }}</h2>
+
+  
+  <div class="alert alert-primary" role="alert">
+    <h2>Mise en cache</h2>
+    <button class="btn btn-primary m-2"
+          (click)="noShareReplay()">
+      Without ShareReplay
+    </button>
+    <button class="btn btn-primary m-2"
+          (click)="shareReplay()">
+      With ShareReplay
+    </button>    
+    <button class="btn btn-primary m-2"
+          (click)="shareReplayLastValues()">
+      With ShareReplay last values
+    </button>
+  </div>
 
   <button class="btn btn-primary d-flex" (click)="toggleIsNewBadge()">
     <span class="material-icons">
@@ -15,7 +35,8 @@
         <b>{{ hotelFilter }}</b>
       </div>
       <div class="col-md-8 form-group">
-        <input type="text" class="form-control" [(ngModel)]="hotelFilter" />
+        <input type="text" class="form-control" [(ngModel)]="hotelFilter" 
+               (ngModelChange)="filterChange($event)"/>
       </div>
     </div>
   </div>
@@ -40,7 +61,9 @@
           <p class="card-text text-decoration-line-through text-danger">
             <del>
               {{
-                hotel.salePrice | currency: "EUR":"symbol":"1.2-2":"fr" | replaceComma
+                hotel.salePrice
+                  | currency: "EUR":"symbol":"1.2-2":"fr"
+                  | replaceComma
               }}
             </del>
           </p>
@@ -60,14 +83,7 @@
             ></app-star-rating>
 
             <span
-              class="
-                material-icons
-                bg-primary
-                text-white
-                p-2
-                rounded-circle
-                btn
-              "
+              class="material-icons bg-primary text-white p-2 rounded-circle btn"
               [routerLink]="['/hotels', hotel.id, 'edit']"
             >
               edit
@@ -83,7 +99,9 @@
             <ng-container *ngIf="showBadge">
               <span
                 class="badge badge-pill"
-                [ngClass]="i % 2 === 0 ? 'badge-info' : 'badge-success ml-2 mr-2'"
+                [ngClass]="
+                  i % 2 === 0 ? 'badge-info' : 'badge-success ml-2 mr-2'
+                "
               >
                 {{ tag }}
               </span>

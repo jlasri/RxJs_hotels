@@ -143,12 +143,12 @@ export class HotelEditComponent implements OnInit, AfterViewInit {
 
         if (hotel.id === 0) {
           this.hotelService.createHotel(hotel).subscribe({
-            next: () => this.saveCompleted(),
+            next: (value: IHotel) => this.saveCompleted(value),
             error: (err) => this.errorMessage = err
           });
         } else {
           this.hotelService.updateHotel(hotel).subscribe({
-            next: () => this.saveCompleted(),
+            next: () => this.saveCompleted(hotel),
             error: (err) => this.errorMessage = err
           });
         }
@@ -160,7 +160,10 @@ export class HotelEditComponent implements OnInit, AfterViewInit {
     console.log(this.hotelForm.value);
   }
 
-  public saveCompleted(): void {
+  public saveCompleted(hotel?: IHotel): void {
+    
+    // Mise en cache
+    this.hotelService.addUpdateHotel(hotel);
     this.hotelForm.reset();
     this.router.navigate(['/hotels']);
   }

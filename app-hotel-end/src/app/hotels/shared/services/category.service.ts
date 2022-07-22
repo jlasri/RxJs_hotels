@@ -1,11 +1,13 @@
-import { HttpClient } from "@angular/common/http";
+import { Injectable } from "@angular/core";
 import { Observable, of } from "rxjs";
 import { category } from "../models/category";
 
-export class categoryService{
-    private readonly HOTEL_API_URL = 'api/hotels';
+@Injectable({
+    providedIn: 'root'
+  })
+export class CategoryService{
 
-    constructor(private http: HttpClient) {}
+    constructor() {}
 
     public getCategories(): Observable<category[]>{
         return of([

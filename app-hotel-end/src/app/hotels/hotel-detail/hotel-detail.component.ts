@@ -25,7 +25,7 @@ export class HotelDetailComponent implements OnInit {
   ngOnInit(): void {
     const id: number = +this.route.snapshot.paramMap.get('id');
 
-    this.hotel$= this.hotelService.getHotels()
+    this.hotel$= this.hotelService.hotelsWithCategories$
                                           .pipe(
                                             map((hotels: IHotel[]) => hotels.find((hotel: IHotel) => hotel.id === id)),
                                             catchError((err) => {
