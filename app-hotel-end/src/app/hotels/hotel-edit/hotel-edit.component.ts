@@ -1,8 +1,9 @@
+import { HttpClient } from '@angular/common/http';
 import { AfterViewInit, Component, ElementRef, OnInit, ViewChildren } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormControlName, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { EMPTY, fromEvent, merge, Observable, timer } from 'rxjs';
-import { debounce, debounceTime } from 'rxjs/operators';
+import { concat, EMPTY, fromEvent, interval, merge, Observable, of, timer } from 'rxjs';
+import { concatMap, debounce, debounceTime, delay, exhaustMap, map, mergeAll, mergeMap, switchMap, take } from 'rxjs/operators';
 import { IHotel } from '../shared/models/hotel';
 import { HotelListService } from '../shared/services/hotel-list.service';
 import { GlobalGenericValidator } from '../shared/validators/global-generic.validator';
@@ -43,7 +44,7 @@ export class HotelEditComponent implements OnInit, AfterViewInit {
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private router: Router,
-    private hotelService: HotelListService
+    private hotelService: HotelListService, private http: HttpClient
   ) { }
 
   ngOnInit(): void {
@@ -65,6 +66,61 @@ export class HotelEditComponent implements OnInit, AfterViewInit {
 
       this.getSelectedHotel(id);
     });
+
+    //#region merge, mergeMap, mergeAll & concatMap
+    const o1$ = interval(500).pipe(
+      take(5),
+      map((val) => 'A: ' + val)
+    );
+    
+    const o2$ = interval(500).pipe(
+      take(5),
+      map((val) => 'B: ' + val)
+    );
+
+    merge(o1$, o2$).subscribe(val => console.log(`Merge => ${val}`));
+
+    // mergeAll
+    const o3$ = of(1, 2, 3).pipe(
+      map(val => this.http.get<IHotel>(`api/hotels/${val}`)),
+      mergeAll()
+    );
+    o3$.subscribe(val => console.log(val));
+
+    // mergeMap
+    const o4$ = of(1, 2, 3).pipe(
+      mergeMap(val => this.http.get<IHotel>(`api/hotels/${val}`))
+    );
+    o4$.subscribe(val => console.log(val));
+
+    // Concat
+    concat(o1$, o2$).subscribe(val => console.warn(`Concat => ${val}`));
+
+    // ConcatMap
+    const o5$ = of(1, 2, 3).pipe(
+      concatMap(val => this.http.get<IHotel>(`api/hotels/${val}`))
+    );
+    o5$.subscribe(val => {
+      console.log('concatMap => ');
+      console.log(val);
+    });
+
+    // switchMap
+    const o6$ = of(1, 2, 3).pipe(
+      switchMap(val => this.http.get<IHotel>(`api/hotels/${val}`))
+    );
+    o6$.subscribe(val => {
+      console.log('SwitchMap => ', val);
+    });
+
+    // exhaustMap
+    const o7$ = of(1, 2, 3).pipe(
+      exhaustMap(val => this.http.get<IHotel>(`api/hotels/${val}`))
+    );
+    o7$.subscribe(val => {
+      console.log('ExhaustMap => ', val);
+    });
+    //#endregion
   }
 
   ngAfterViewInit() {

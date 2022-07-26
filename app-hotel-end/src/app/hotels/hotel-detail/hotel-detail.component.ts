@@ -1,7 +1,8 @@
+import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, of, throwError } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { from, Observable, of, throwError } from 'rxjs';
+import { catchError, filter, map, mergeMap, tap, toArray } from 'rxjs/operators';
 import { IHotel } from '../shared/models/hotel';
 import { HotelListService } from '../shared/services/hotel-list.service';
 
@@ -19,7 +20,8 @@ export class HotelDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private hotelService: HotelListService,
-    private router: Router
+    private router: Router,
+    private http: HttpClient
   ) { }
 
   ngOnInit(): void {
@@ -37,7 +39,17 @@ export class HotelDetailComponent implements OnInit {
                                             }),
                                             tap(console.log)
                                           );
-
+    
+    const menus = this.hotel$.pipe(
+      // Récuperer l'hotel
+      mergeMap((hotel: IHotel) => from(hotel.menus).pipe(
+        // Filtrer les élements null ou undefined ==> !! ou Boolean()
+        filter((menu: number) => Boolean(menu)),
+        // Récuperer l'identifiant du menu
+        mergeMap((menuId: number) => this.http.get<IHotel>(`api/hotels/${menuId}`)),
+        toArray()
+      ))
+    ).subscribe(console.warn);
   }
 
   public backToList(): void {

@@ -9,6 +9,7 @@ export interface IHotel {
   tags?: string[];
   catId?: number;
   cat?: string;
+  menus?: number[]
 }
 
 export class Hotel implements IHotel {
